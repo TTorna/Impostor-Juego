@@ -1,8 +1,12 @@
-const express = require('express');
-const http = require('http');
-const { Server } = require('socket.io');
-const path = require('path');
-const cors = require('cors');
+import express from 'express';
+import { createServer } from 'http';
+import { Server } from 'socket.io';
+import path from 'path';
+import { fileURLToPath } from 'url';
+import cors from 'cors';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 const app = express();
 app.use(cors());
@@ -10,7 +14,7 @@ app.use(cors());
 // Serve static files from the React app build directory
 app.use(express.static(path.join(__dirname, '../dist')));
 
-const server = http.createServer(app);
+const server = createServer(app);
 const io = new Server(server, {
     cors: {
         origin: "*", // Allow all origins for development/tunneling
@@ -96,32 +100,6 @@ io.on('connection', (socket) => {
         const room = rooms.get(roomCode);
         if (room && room.hostId === socket.id) {
             room.gameState.phase = 'playing';
-            room.gameState.playersData = gameData; // Array of { id, type, word, hint } assigned by host client logic or server logic?
-            // Better to do assignment on server to prevent cheating, but for simplicity we can accept it or generate here.
-            // Let's generate here to be secure.
-
-            // Server-side generation logic
-            // We need the categories data. For simplicity, we'll accept the processed data from the host 
-            // OR we can move the category logic to the server. 
-            // To keep it simple and consistent with the current codebase, let's trust the host to send the config 
-            // and we just broadcast it. 
-            // WAIT: If we trust the host, we can just broadcast 'game-started' with the assigned roles.
-            // BUT: We don't want clients to know others' roles.
-            // So the Host Client should generate the distribution and send it to the server?
-            // No, that sends all data to the server.
-            // Let's implement the generation logic here on the server? 
-            // That requires moving 'categories.js' to shared or server.
-
-            // Alternative: Host generates, sends { [playerId]: { type, word, hint } } map to server.
-            // Server sends specific data to each socket.
-
-            // Let's do: Host sends configuration, Server generates roles.
-            // We need 'categories.js' on the server.
-
-            // For now, to avoid duplicating data files, let's accept the "distributed roles" from the host.
-            // The host client will run the logic and send: 
-            // playersData: [ { id: 'socketid', type: '...', word: '...', hint: '...' } ]
-
             room.gameState.playersData = gameData;
 
             // Send specific data to each player
