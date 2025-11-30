@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { categories } from '../data/categories';
 
-export default function OnlineRoom({ socket, room }) {
+export default function OnlineRoom({ socket, room, onLeave }) {
     const isHost = room.hostId === socket.id;
     const [settings, setSettings] = useState(room.settings);
 
@@ -90,7 +90,7 @@ export default function OnlineRoom({ socket, room }) {
             {isHost ? (
                 <>
                     <div className="input-group">
-                        <label>Impostores</label>
+                        <label style={{ textAlign: 'left' }}>Impostores</label>
                         <input
                             type="number"
                             min="1"
@@ -101,7 +101,7 @@ export default function OnlineRoom({ socket, room }) {
                     </div>
 
                     <div className="input-group">
-                        <label>Categorías</label>
+                        <label style={{ textAlign: 'left' }}>Categorías</label>
                         <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.5rem' }}>
                             {categories.map(cat => (
                                 <button
@@ -124,7 +124,7 @@ export default function OnlineRoom({ socket, room }) {
                     </div>
 
                     <div className="input-group" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-                        <label style={{ marginBottom: 0 }}>Pistas</label>
+                        <label style={{ marginTop: '0.75rem' }}>Pistas</label>
                         <div
                             onClick={() => handleSettingChange({ ...settings, showHints: !settings.showHints })}
                             style={{
@@ -156,7 +156,7 @@ export default function OnlineRoom({ socket, room }) {
                         disabled={room.players.length < 3}
                         style={{ opacity: room.players.length < 3 ? 0.5 : 1 }}
                     >
-                        {room.players.length < 3 ? 'Esperando jugadores...' : 'Comenzar Partida'}
+                        {room.players.length <= 3 ? 'Esperando jugadores...' : 'Comenzar Partida'}
                     </button>
                 </>
             ) : (
@@ -167,6 +167,22 @@ export default function OnlineRoom({ socket, room }) {
                     </div>
                 </div>
             )}
+
+            <button
+                onClick={onLeave}
+                style={{
+                    width: '100%',
+                    padding: '1rem',
+                    background: 'transparent',
+                    color: 'var(--text-secondary)',
+                    marginTop: '1rem',
+                    border: 'none',
+                    cursor: 'pointer',
+                    fontSize: '0.875rem'
+                }}
+            >
+                Salir de la Sala
+            </button>
         </div>
     );
 }

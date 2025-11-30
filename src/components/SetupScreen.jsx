@@ -46,7 +46,7 @@ export default function SetupScreen({ onStartGame }) {
     return (
         <div className="card animate-fade-in">
             <div className="input-group">
-                <label>Cantidad de Jugadores</label>
+                <label style={{ textAlign: 'left' }}>Cantidad de Jugadores</label>
                 <input
                     type="number"
                     min="3"
@@ -61,7 +61,7 @@ export default function SetupScreen({ onStartGame }) {
             </div>
 
             <div className="input-group">
-                <label>Cantidad de Impostores</label>
+                <label style={{ textAlign: 'left' }}>Cantidad de Impostores</label>
                 <input
                     type="number"
                     min="1"
@@ -75,7 +75,7 @@ export default function SetupScreen({ onStartGame }) {
             </div>
 
             <div className="input-group">
-                <label>Categorías</label>
+                <label style={{ textAlign: 'left' }}>Categorías</label>
                 <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.5rem' }}>
                     {categories.map(cat => (
                         <button

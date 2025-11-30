@@ -16,47 +16,48 @@ export default function OnlineLobby({ socket, onBack }) {
     };
 
     return (
-        <div className="card animate-fade-in">
-            <h2 style={{ textAlign: 'center', marginBottom: '2rem' }}>Modo Online</h2>
-
-            <div className="input-group">
-                <label>Tu Nombre</label>
-                <input
-                    type="text"
-                    value={playerName}
-                    onChange={(e) => setPlayerName(e.target.value)}
-                    placeholder="Ej: Toto"
-                />
-            </div>
-
-            <div style={{ borderTop: '1px solid rgba(255,255,255,0.1)', margin: '2rem 0', paddingTop: '2rem' }}>
-                <button className="btn-primary" onClick={handleCreate} style={{ marginBottom: '1rem' }}>
-                    Crear Sala
-                </button>
-
-                <div style={{ textAlign: 'center', margin: '1rem 0', color: 'var(--text-secondary)' }}>O</div>
+        <>
+            <div className="card animate-fade-in">
+                <h2 style={{ textAlign: 'center', marginBottom: '2rem' }}>Modo Online</h2>
 
                 <div className="input-group">
-                    <label>Código de Sala</label>
+                    <label>Tu Nombre</label>
                     <input
                         type="text"
-                        value={roomCode}
-                        onChange={(e) => setRoomCode(e.target.value.toUpperCase())}
-                        placeholder="Ej: ABC123"
-                        maxLength={6}
-                        style={{ textAlign: 'center', letterSpacing: '0.2em', textTransform: 'uppercase' }}
+                        value={playerName}
+                        onChange={(e) => setPlayerName(e.target.value)}
+                        placeholder="Ej: Toto"
                     />
                 </div>
 
-                <button
-                    className="btn-primary"
-                    onClick={handleJoin}
-                    style={{ background: 'var(--secondary-gradient)' }}
-                >
-                    Unirse a Sala
-                </button>
-            </div>
+                <div style={{ borderTop: '1px solid rgba(255,255,255,0.1)', margin: '2rem 0', paddingTop: '2rem' }}>
+                    <button className="btn-primary" onClick={handleCreate} style={{ marginBottom: '1rem' }}>
+                        Crear Sala
+                    </button>
 
+                    <div style={{ textAlign: 'center', margin: '1rem 0', color: 'var(--text-secondary)' }}>O</div>
+
+                    <div className="input-group">
+                        <label>Código de Sala</label>
+                        <input
+                            type="text"
+                            value={roomCode}
+                            onChange={(e) => setRoomCode(e.target.value.toUpperCase())}
+                            placeholder="Ej: ABC123"
+                            maxLength={6}
+                            style={{ textAlign: 'center', letterSpacing: '0.2em', textTransform: 'uppercase' }}
+                        />
+                    </div>
+
+                    <button
+                        className="btn-primary"
+                        onClick={handleJoin}
+                        style={{ background: 'var(--secondary-gradient)' }}
+                    >
+                        Unirse a Sala
+                    </button>
+                </div>
+            </div>
             <button
                 onClick={onBack}
                 style={{
@@ -64,11 +65,13 @@ export default function OnlineLobby({ socket, onBack }) {
                     padding: '1rem',
                     background: 'transparent',
                     color: 'var(--text-secondary)',
-                    marginTop: '1rem'
+                    marginTop: '1rem',
+                    border: 'none',
+                    cursor: 'pointer'
                 }}
             >
                 Volver al Menú
             </button>
-        </div>
+        </>
     );
 }

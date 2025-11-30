@@ -76,7 +76,7 @@ export default function OnlineManager({ onBack }) {
             )}
 
             {view === 'room' && roomData && (
-                <OnlineRoom socket={socket} room={roomData} />
+                <OnlineRoom socket={socket} room={roomData} onLeave={onBack} />
             )}
 
             {view === 'game' && playerData && (

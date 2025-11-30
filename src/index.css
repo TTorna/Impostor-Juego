@@ -9,7 +9,7 @@
   --secondary-gradient: linear-gradient(135deg, #3b82f6 0%, #2dd4bf 100%);
   --danger-gradient: linear-gradient(135deg, #ef4444 0%, #f43f5e 100%);
   --accent-color: #8b5cf6;
-  
+
   --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
   --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
   --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
@@ -41,9 +41,13 @@ body {
   min-height: 100vh;
   display: flex;
   flex-direction: column;
+  justify-content: center;
+  /* Center vertically */
 }
 
-h1, h2, h3 {
+h1,
+h2,
+h3 {
   font-weight: 800;
   letter-spacing: -0.025em;
 }
@@ -85,7 +89,8 @@ button {
 }
 
 .input-group {
-  margin-bottom: 1.5rem;
+  margin-bottom: 2rem;
+  text-align: center;
 }
 
 label {
@@ -93,29 +98,51 @@ label {
   font-size: 0.875rem;
   font-weight: 600;
   color: var(--text-secondary);
-  margin-bottom: 0.5rem;
+  margin-bottom: 0.75rem;
+  text-align: center;
 }
 
-input[type="number"], select {
+input[type="text"],
+input[type="number"],
+select {
   width: 100%;
-  padding: 0.75rem 1rem;
-  background: rgba(0, 0, 0, 0.2);
+  padding: 1rem 1.5rem;
+  /* Larger padding */
+  background: rgba(0, 0, 0, 0.3);
+  /* Darker semi-transparent bg */
   border: 1px solid rgba(255, 255, 255, 0.1);
-  border-radius: 0.75rem;
+  border-radius: 1rem;
+  /* More rounded */
   color: white;
-  font-size: 1rem;
-  transition: border-color 0.2s;
+  font-size: 1.125rem;
+  /* Larger font */
+  transition: all 0.3s ease;
+  text-align: center;
+  /* Center text inside input */
+  box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
-input[type="number"]:focus, select:focus {
+input[type="text"]:focus,
+input[type="number"]:focus,
+select:focus {
   outline: none;
   border-color: var(--accent-color);
+  background: rgba(0, 0, 0, 0.5);
+  box-shadow: 0 0 0 4px rgba(139, 92, 246, 0.1), inset 0 2px 4px rgba(0, 0, 0, 0.1);
+  transform: translateY(-1px);
 }
 
 /* Animations */
 @keyframes fadeIn {
-  from { opacity: 0; transform: translateY(10px); }
-  to { opacity: 1; transform: translateY(0); }
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 .animate-fade-in {
