@@ -116,7 +116,9 @@ io.on('connection', (socket) => {
                 io.to(roomCode).emit('update-room', room);
                 io.to(roomCode).emit('game-reset');
             }
-        });
+        }
+    }
+    );
 
     // Disconnect
     socket.on('disconnect', () => {
