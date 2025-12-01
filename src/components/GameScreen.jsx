@@ -87,7 +87,7 @@ export default function GameScreen({ config, onEndGame }) {
                 type={players[currentPlayerIndex].type}
                 hint={players[currentPlayerIndex].hint}
                 isRevealed={isCardRevealed}
-                onReveal={() => setIsCardRevealed(true)}
+                onReveal={() => setIsCardRevealed(!isCardRevealed)}
                 onNext={handleNext}
             />
         </div>

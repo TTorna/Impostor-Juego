@@ -21,8 +21,8 @@ export default function OnlineGame({ socket, data, room }) {
                 type={data.type}
                 hint={data.hint}
                 isRevealed={isRevealed}
-                onReveal={() => setIsRevealed(true)}
-                onNext={() => { }} // No "next player" action needed in online mode
+                onReveal={() => setIsRevealed(!isRevealed)}
+                onNext={null} // No "next player" button in online mode
             />
 
             {isHost && (

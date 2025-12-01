@@ -2,10 +2,13 @@ import { useState } from 'react';
 import { categories } from '../data/categories';
 
 export default function SetupScreen({ onStartGame }) {
-    const [playerCount, setPlayerCount] = useState(4);
-    const [impostorCount, setImpostorCount] = useState(1);
-    const [selectedCategories, setSelectedCategories] = useState(['lugares']);
-    const [showHints, setShowHints] = useState(false);
+    const [playerCount, setPlayerCount] = useState(() => parseInt(localStorage.getItem('impostor_playerCount')) || 4);
+    const [impostorCount, setImpostorCount] = useState(() => parseInt(localStorage.getItem('impostor_impostorCount')) || 1);
+    const [selectedCategories, setSelectedCategories] = useState(() => {
+        const saved = localStorage.getItem('impostor_categories');
+        return saved ? JSON.parse(saved) : ['lugares'];
+    });
+    const [showHints, setShowHints] = useState(() => localStorage.getItem('impostor_showHints') === 'true');
 
     const [error, setError] = useState('');
 
@@ -35,6 +38,12 @@ export default function SetupScreen({ onStartGame }) {
         }
 
         setError('');
+        // Save settings
+        localStorage.setItem('impostor_playerCount', playerCount);
+        localStorage.setItem('impostor_impostorCount', impostorCount);
+        localStorage.setItem('impostor_categories', JSON.stringify(selectedCategories));
+        localStorage.setItem('impostor_showHints', showHints);
+
         onStartGame({
             playerCount,
             impostorCount,

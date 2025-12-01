@@ -3,7 +3,21 @@ import { categories } from '../data/categories';
 
 export default function OnlineRoom({ socket, room, onLeave }) {
     const isHost = room.hostId === socket.id;
-    const [settings, setSettings] = useState(room.settings);
+    const [settings, setSettings] = useState(() => {
+        if (isHost) {
+            const savedImpostors = parseInt(localStorage.getItem('impostor_online_impostorCount'));
+            const savedCats = localStorage.getItem('impostor_online_categories');
+            const savedHints = localStorage.getItem('impostor_online_showHints');
+
+            return {
+                ...room.settings,
+                impostorCount: savedImpostors || room.settings.impostorCount,
+                selectedCategories: savedCats ? JSON.parse(savedCats) : room.settings.selectedCategories,
+                showHints: savedHints !== null ? savedHints === 'true' : room.settings.showHints
+            };
+        }
+        return room.settings;
+    });
 
     // Sync local settings state when room updates
     if (JSON.stringify(settings) !== JSON.stringify(room.settings) && !isHost) {
@@ -12,6 +26,11 @@ export default function OnlineRoom({ socket, room, onLeave }) {
 
     const handleSettingChange = (newSettings) => {
         setSettings(newSettings);
+        if (isHost) {
+            localStorage.setItem('impostor_online_impostorCount', newSettings.impostorCount);
+            localStorage.setItem('impostor_online_categories', JSON.stringify(newSettings.selectedCategories));
+            localStorage.setItem('impostor_online_showHints', newSettings.showHints);
+        }
         socket.emit('update-settings', { roomCode: room.code, settings: newSettings });
     };
 
@@ -94,7 +113,7 @@ export default function OnlineRoom({ socket, room, onLeave }) {
                         <input
                             type="number"
                             min="1"
-                            max={Math.max(1, room.players.length - 1)}
+                            max={room.players.length}
                             value={settings.impostorCount}
                             onChange={(e) => handleSettingChange({ ...settings, impostorCount: parseInt(e.target.value) })}
                         />
@@ -153,10 +172,10 @@ export default function OnlineRoom({ socket, room, onLeave }) {
                     <button
                         className="btn-primary"
                         onClick={handleStart}
-                        disabled={room.players.length < 3}
-                        style={{ opacity: room.players.length < 3 ? 0.5 : 1 }}
+                        disabled={room.players.length < 3 || settings.impostorCount > room.players.length}
+                        style={{ opacity: (room.players.length < 3 || settings.impostorCount > room.players.length) ? 0.5 : 1 }}
                     >
-                        {room.players.length <= 3 ? 'Esperando jugadores...' : 'Comenzar Partida'}
+                        {room.players.length < 3 ? 'Esperando jugadores...' : 'Iniciar juego'}
                     </button>
                 </>
             ) : (

@@ -6,14 +6,14 @@ export default function Card({ content, type, hint, isRevealed, onReveal, onNext
     return (
         <div style={{ perspective: '1000px', width: '100%', maxWidth: '300px', height: '400px', margin: '0 auto' }}>
             <div
-                onClick={!isRevealed ? onReveal : null}
+                onClick={onReveal}
                 style={{
                     position: 'relative',
                     width: '100%',
                     height: '100%',
                     transition: 'transform 0.8s',
                     transformStyle: 'preserve-3d',
-                    cursor: !isRevealed ? 'pointer' : 'default',
+                    cursor: 'pointer',
                     transform: isRevealed ? 'rotateY(180deg)' : 'rotateY(0deg)'
                 }}
             >
@@ -53,7 +53,12 @@ export default function Card({ content, type, hint, isRevealed, onReveal, onNext
                     boxShadow: 'var(--shadow-lg)',
                     color: 'white',
                     textAlign: 'center'
-                }}>
+                }}
+                    onClick={(e) => {
+                        e.stopPropagation();
+                        onReveal();
+                    }}
+                >
                     {type === 'impostor' ? (
                         <>
                             <div style={{ fontSize: '4rem', marginBottom: '1rem' }}>🤫</div>
@@ -73,24 +78,26 @@ export default function Card({ content, type, hint, isRevealed, onReveal, onNext
                         </>
                     )}
 
-                    <button
-                        onClick={(e) => {
-                            e.stopPropagation();
-                            onNext();
-                        }}
-                        style={{
-                            marginTop: 'auto',
-                            background: 'white',
-                            color: type === 'impostor' ? '#ef4444' : '#3b82f6',
-                            padding: '0.75rem 1.5rem',
-                            borderRadius: '0.75rem',
-                            fontWeight: 'bold',
-                            fontSize: '1rem',
-                            boxShadow: '0 4px 6px rgba(0,0,0,0.1)'
-                        }}
-                    >
-                        Siguiente Jugador
-                    </button>
+                    {onNext && (
+                        <button
+                            onClick={(e) => {
+                                e.stopPropagation();
+                                onNext();
+                            }}
+                            style={{
+                                marginTop: 'auto',
+                                background: 'white',
+                                color: type === 'impostor' ? '#ef4444' : '#3b82f6',
+                                padding: '0.75rem 1.5rem',
+                                borderRadius: '0.75rem',
+                                fontWeight: 'bold',
+                                fontSize: '1rem',
+                                boxShadow: '0 4px 6px rgba(0,0,0,0.1)'
+                            }}
+                        >
+                            Siguiente Jugador
+                        </button>
+                    )}
                 </div>
             </div>
         </div>

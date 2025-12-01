@@ -1,17 +1,19 @@
 import { useState } from 'react';
 
 export default function OnlineLobby({ socket, onBack }) {
-    const [playerName, setPlayerName] = useState('');
+    const [playerName, setPlayerName] = useState(() => localStorage.getItem('impostor_playerName') || '');
     const [roomCode, setRoomCode] = useState('');
 
     const handleCreate = () => {
         if (!playerName.trim()) return alert('Ingresa tu nombre');
+        localStorage.setItem('impostor_playerName', playerName);
         socket.emit('create-room', { playerName });
     };
 
     const handleJoin = () => {
         if (!playerName.trim()) return alert('Ingresa tu nombre');
         if (!roomCode.trim()) return alert('Ingresa el código de sala');
+        localStorage.setItem('impostor_playerName', playerName);
         socket.emit('join-room', { roomCode: roomCode.toUpperCase(), playerName });
     };
 
