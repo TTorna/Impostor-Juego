@@ -2,6 +2,8 @@ import { useState } from 'react';
 import SetupScreen from './components/SetupScreen';
 import GameScreen from './components/GameScreen';
 import OnlineManager from './components/OnlineManager';
+import ReverseSongGame from './components/ReverseSongGame';
+import './App.css';
 
 function App() {
   const [game, setGame] = useState(null); // null (main menu), 'impostor', 'whoiswho'
@@ -69,6 +71,38 @@ function App() {
             </p>
           </div>
 
+          {/* Desafío Invertido Card */}
+          <div
+            onClick={() => setGame('reverse')}
+            className="card animate-fade-in"
+            style={{
+              cursor: 'pointer',
+              transition: 'transform 0.2s, box-shadow 0.2s',
+              display: 'flex',
+              flexDirection: 'column',
+              alignItems: 'center',
+              textAlign: 'center',
+              padding: '2rem',
+              border: '1px solid rgba(255,255,255,0.1)'
+            }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.transform = 'translateY(-5px)';
+              e.currentTarget.style.boxShadow = '0 10px 30px -10px rgba(0,0,0,0.5)';
+              e.currentTarget.style.borderColor = 'var(--accent-color)';
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.transform = 'translateY(0)';
+              e.currentTarget.style.boxShadow = 'none';
+              e.currentTarget.style.borderColor = 'rgba(255,255,255,0.1)';
+            }}
+          >
+            <div style={{ fontSize: '4rem', marginBottom: '1rem' }}>🎵</div>
+            <h2 style={{ fontSize: '2rem', marginBottom: '0.5rem' }}>Desafío Invertido</h2>
+            <p style={{ color: 'var(--text-secondary)', lineHeight: '1.5' }}>
+              Graba, invierte e imita canciones.
+            </p>
+          </div>
+
           {/* Who is Who Card */}
           <div
             onClick={() => {
@@ -110,6 +144,10 @@ function App() {
         </footer>
       </div>
     );
+  }
+
+  if (game === 'reverse') {
+    return <ReverseSongGame onBack={() => setGame(null)} />;
   }
 
   if (mode === 'online') {
