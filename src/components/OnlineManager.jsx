@@ -4,7 +4,9 @@ import OnlineLobby from './OnlineLobby';
 import OnlineRoom from './OnlineRoom';
 import OnlineGame from './OnlineGame';
 
-export default function OnlineManager({ onBack }) {
+import WhoIsWhoGame from './WhoIsWhoGame';
+
+export default function OnlineManager({ gameType, onBack }) {
     const [socket, setSocket] = useState(null);
     const [view, setView] = useState('lobby'); // lobby, room, game
     const [roomData, setRoomData] = useState(null);
@@ -72,7 +74,7 @@ export default function OnlineManager({ onBack }) {
             )}
 
             {view === 'lobby' && (
-                <OnlineLobby socket={socket} onBack={onBack} />
+                <OnlineLobby socket={socket} gameType={gameType} onBack={onBack} />
             )}
 
             {view === 'room' && roomData && (
@@ -80,7 +82,11 @@ export default function OnlineManager({ onBack }) {
             )}
 
             {view === 'game' && playerData && (
-                <OnlineGame socket={socket} data={playerData} room={roomData} />
+                gameType === 'impostor' ? (
+                    <OnlineGame socket={socket} data={playerData} room={roomData} />
+                ) : (
+                    <WhoIsWhoGame socket={socket} data={playerData} room={roomData} onLeave={onBack} />
+                )
             )}
         </div>
     );

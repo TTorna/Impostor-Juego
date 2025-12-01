@@ -34,10 +34,11 @@ io.on('connection', (socket) => {
     console.log('User connected:', socket.id);
 
     // Create Room
-    socket.on('create-room', ({ playerName }) => {
+    socket.on('create-room', ({ playerName, gameType }) => {
         const roomCode = generateRoomCode();
         const newRoom = {
             code: roomCode,
+            gameType: gameType || 'impostor', // Default to impostor for backward compatibility
             hostId: socket.id,
             players: [{ id: socket.id, name: playerName, isHost: true }],
             settings: {
@@ -109,19 +110,13 @@ io.on('connection', (socket) => {
 
             // Notify everyone game started (for UI state)
             io.to(roomCode).emit('room-game-start');
-        }
-    });
-
-    // Restart Game
-    socket.on('restart-game', ({ roomCode }) => {
-        const room = rooms.get(roomCode);
-        if (room && room.hostId === socket.id) {
-            room.gameState.phase = 'lobby';
-            room.gameState.playersData = [];
-            io.to(roomCode).emit('update-room', room);
-            io.to(roomCode).emit('game-reset');
-        }
-    });
+            if (room && room.hostId === socket.id) {
+                room.gameState.phase = 'lobby';
+                room.gameState.playersData = [];
+                io.to(roomCode).emit('update-room', room);
+                io.to(roomCode).emit('game-reset');
+            }
+        });
 
     // Disconnect
     socket.on('disconnect', () => {

@@ -1,13 +1,13 @@
 import { useState } from 'react';
 
-export default function OnlineLobby({ socket, onBack }) {
+export default function OnlineLobby({ socket, gameType, onBack }) {
     const [playerName, setPlayerName] = useState(() => localStorage.getItem('impostor_playerName') || '');
     const [roomCode, setRoomCode] = useState('');
 
     const handleCreate = () => {
         if (!playerName.trim()) return alert('Ingresa tu nombre');
         localStorage.setItem('impostor_playerName', playerName);
-        socket.emit('create-room', { playerName });
+        socket.emit('create-room', { playerName, gameType });
     };
 
     const handleJoin = () => {

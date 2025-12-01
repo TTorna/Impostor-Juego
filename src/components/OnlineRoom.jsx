@@ -3,16 +3,28 @@ import { categories } from '../data/categories';
 
 export default function OnlineRoom({ socket, room, onLeave }) {
     const isHost = room.hostId === socket.id;
+    const isWhoIsWho = room.gameType === 'whoiswho';
+
     const [settings, setSettings] = useState(() => {
         if (isHost) {
             const savedImpostors = parseInt(localStorage.getItem('impostor_online_impostorCount'));
             const savedCats = localStorage.getItem('impostor_online_categories');
             const savedHints = localStorage.getItem('impostor_online_showHints');
 
+            let parsedCats = room.settings.selectedCategories;
+            try {
+                if (savedCats) {
+                    const parsed = JSON.parse(savedCats);
+                    if (Array.isArray(parsed)) parsedCats = parsed;
+                }
+            } catch (e) {
+                console.error('Error parsing saved categories', e);
+            }
+
             return {
                 ...room.settings,
                 impostorCount: savedImpostors || room.settings.impostorCount,
-                selectedCategories: savedCats ? JSON.parse(savedCats) : room.settings.selectedCategories,
+                selectedCategories: parsedCats,
                 showHints: savedHints !== null ? savedHints === 'true' : room.settings.showHints
             };
         }
@@ -48,34 +60,75 @@ export default function OnlineRoom({ socket, room, onLeave }) {
     };
 
     const handleStart = () => {
-        // Generate game data here (Host Client Logic)
-        // 1. Select Category & Word
-        const randomCatId = settings.selectedCategories[Math.floor(Math.random() * settings.selectedCategories.length)];
-        const category = categories.find(c => c.id === randomCatId);
-        const wordObj = category.words[Math.floor(Math.random() * category.words.length)];
+        if (!isHost) return;
 
-        // 2. Assign Roles
-        const players = [...room.players];
-        const gameData = players.map(p => ({
-            id: p.id,
-            name: p.name,
-            type: 'civilian',
-            word: wordObj.word,
-            hint: null
-        }));
-
-        let impostorsAssigned = 0;
-        while (impostorsAssigned < settings.impostorCount) {
-            const idx = Math.floor(Math.random() * players.length);
-            if (gameData[idx].type !== 'impostor') {
-                const randomHint = wordObj.hints[Math.floor(Math.random() * wordObj.hints.length)];
-                gameData[idx].type = 'impostor';
-                gameData[idx].hint = settings.showHints ? randomHint : null;
-                impostorsAssigned++;
-            }
+        if (settings.selectedCategories.length === 0) {
+            alert('Selecciona al menos una categoría');
+            return;
         }
 
-        socket.emit('start-game', { roomCode: room.code, gameData });
+        const randomCatId = settings.selectedCategories[Math.floor(Math.random() * settings.selectedCategories.length)];
+        const category = categories.find(c => c.id === randomCatId);
+
+        if (!category) {
+            alert('Error: Categoría no encontrada');
+            return;
+        }
+
+        const players = [...room.players];
+
+        if (isWhoIsWho) {
+            // Who is Who Logic (Headbands)
+            const availableWords = [...category.words];
+            // Shuffle words
+            for (let i = availableWords.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [availableWords[i], availableWords[j]] = [availableWords[j], availableWords[i]];
+            }
+
+            // Assign one character per player
+            const commonData = players.map((p, index) => ({
+                id: p.id,
+                name: p.name,
+                character: availableWords[index % availableWords.length].word
+            }));
+
+            // Payload: Each player gets the FULL list
+            const gameData = players.map(p => ({
+                id: p.id,
+                playersData: commonData
+            }));
+
+            socket.emit('start-game', { roomCode: room.code, gameData });
+
+        } else {
+            // Impostor Logic
+            const wordObj = category.words[Math.floor(Math.random() * category.words.length)];
+
+            const gameData = players.map(p => ({
+                id: p.id,
+                name: p.name,
+                type: 'civilian',
+                word: wordObj.word,
+                hint: null
+            }));
+
+            let impostorsAssigned = 0;
+            // Safety check to avoid infinite loop if impostorCount >= players
+            const actualImpostorCount = Math.min(settings.impostorCount, players.length - 1);
+
+            while (impostorsAssigned < actualImpostorCount) {
+                const idx = Math.floor(Math.random() * players.length);
+                if (gameData[idx].type !== 'impostor') {
+                    const randomHint = wordObj.hints[Math.floor(Math.random() * wordObj.hints.length)];
+                    gameData[idx].type = 'impostor';
+                    gameData[idx].hint = settings.showHints ? randomHint : null;
+                    impostorsAssigned++;
+                }
+            }
+
+            socket.emit('start-game', { roomCode: room.code, gameData });
+        }
     };
 
     return (
@@ -108,16 +161,18 @@ export default function OnlineRoom({ socket, room, onLeave }) {
 
             {isHost ? (
                 <>
-                    <div className="input-group">
-                        <label style={{ textAlign: 'left' }}>Impostores</label>
-                        <input
-                            type="number"
-                            min="1"
-                            max={room.players.length}
-                            value={settings.impostorCount}
-                            onChange={(e) => handleSettingChange({ ...settings, impostorCount: parseInt(e.target.value) })}
-                        />
-                    </div>
+                    {!isWhoIsWho && (
+                        <div className="input-group">
+                            <label style={{ textAlign: 'left' }}>Impostores</label>
+                            <input
+                                type="number"
+                                min="1"
+                                max={Math.max(1, room.players.length - 1)}
+                                value={settings.impostorCount}
+                                onChange={(e) => handleSettingChange({ ...settings, impostorCount: parseInt(e.target.value) })}
+                            />
+                        </div>
+                    )}
 
                     <div className="input-group">
                         <label style={{ textAlign: 'left' }}>Categorías</label>
@@ -142,47 +197,49 @@ export default function OnlineRoom({ socket, room, onLeave }) {
                         </div>
                     </div>
 
-                    <div className="input-group" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-                        <label style={{ marginTop: '0.75rem' }}>Pistas</label>
-                        <div
-                            onClick={() => handleSettingChange({ ...settings, showHints: !settings.showHints })}
-                            style={{
-                                width: '3rem',
-                                height: '1.75rem',
-                                background: settings.showHints ? 'var(--accent-color)' : 'rgba(255,255,255,0.2)',
-                                borderRadius: '9999px',
-                                position: 'relative',
-                                cursor: 'pointer',
-                                transition: 'background 0.2s'
-                            }}
-                        >
-                            <div style={{
-                                width: '1.25rem',
-                                height: '1.25rem',
-                                background: 'white',
-                                borderRadius: '50%',
-                                position: 'absolute',
-                                top: '0.25rem',
-                                left: settings.showHints ? '1.5rem' : '0.25rem',
-                                transition: 'left 0.2s'
-                            }} />
+                    {!isWhoIsWho && (
+                        <div className="input-group" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                            <label style={{ marginTop: '0.75rem' }}>Pistas</label>
+                            <div
+                                onClick={() => handleSettingChange({ ...settings, showHints: !settings.showHints })}
+                                style={{
+                                    width: '3rem',
+                                    height: '1.75rem',
+                                    background: settings.showHints ? 'var(--accent-color)' : 'rgba(255,255,255,0.2)',
+                                    borderRadius: '9999px',
+                                    position: 'relative',
+                                    cursor: 'pointer',
+                                    transition: 'background 0.2s'
+                                }}
+                            >
+                                <div style={{
+                                    width: '1.25rem',
+                                    height: '1.25rem',
+                                    background: 'white',
+                                    borderRadius: '50%',
+                                    position: 'absolute',
+                                    top: '0.25rem',
+                                    left: settings.showHints ? '1.5rem' : '0.25rem',
+                                    transition: 'left 0.2s'
+                                }} />
+                            </div>
                         </div>
-                    </div>
+                    )}
 
                     <button
                         className="btn-primary"
                         onClick={handleStart}
-                        disabled={room.players.length < 3 || settings.impostorCount > room.players.length}
-                        style={{ opacity: (room.players.length < 3 || settings.impostorCount > room.players.length) ? 0.5 : 1 }}
+                        disabled={room.players.length < (isWhoIsWho ? 2 : 3) || (!isWhoIsWho && settings.impostorCount >= room.players.length)}
+                        style={{ opacity: (room.players.length < (isWhoIsWho ? 2 : 3) || (!isWhoIsWho && settings.impostorCount >= room.players.length)) ? 0.5 : 1 }}
                     >
-                        {room.players.length < 3 ? 'Esperando jugadores...' : 'Iniciar juego'}
+                        {room.players.length < (isWhoIsWho ? 2 : 3) ? 'Esperando jugadores...' : 'Iniciar juego'}
                     </button>
                 </>
             ) : (
                 <div style={{ textAlign: 'center', padding: '2rem', background: 'rgba(0,0,0,0.2)', borderRadius: '1rem' }}>
                     <p>Esperando a que el anfitrión inicie la partida...</p>
                     <div style={{ marginTop: '1rem', fontSize: '0.875rem', opacity: 0.7 }}>
-                        Configuración: {settings.impostorCount} Impostor(es), {settings.selectedCategories.length} Categorías
+                        Configuración: {isWhoIsWho ? '¿Quién es Quién?' : `${settings.impostorCount} Impostor(es)`}, {settings.selectedCategories.length} Categorías
                     </div>
                 </div>
             )}
