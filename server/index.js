@@ -110,15 +110,19 @@ io.on('connection', (socket) => {
 
             // Notify everyone game started (for UI state)
             io.to(roomCode).emit('room-game-start');
-            if (room && room.hostId === socket.id) {
-                room.gameState.phase = 'lobby';
-                room.gameState.playersData = [];
-                io.to(roomCode).emit('update-room', room);
-                io.to(roomCode).emit('game-reset');
-            }
         }
-    }
-    );
+    });
+
+    // Restart Game
+    socket.on('restart-game', ({ roomCode }) => {
+        const room = rooms.get(roomCode);
+        if (room && room.hostId === socket.id) {
+            room.gameState.phase = 'lobby';
+            room.gameState.playersData = [];
+            io.to(roomCode).emit('update-room', room);
+            io.to(roomCode).emit('game-reset');
+        }
+    });
 
     // Disconnect
     socket.on('disconnect', () => {
