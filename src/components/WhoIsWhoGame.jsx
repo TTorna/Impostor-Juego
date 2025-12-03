@@ -62,12 +62,21 @@ export default function WhoIsWhoGame({ socket, data, room, onLeave }) {
 
             {isHost && (
                 <div style={{ marginTop: '2rem', paddingBottom: '2rem', display: 'flex', gap: '1rem', justifyContent: 'center' }}>
-                    <button
-                        className="btn-primary"
-                        onClick={handleRestart}
-                    >
-                        Nuevo Juego
-                    </button>
+                    {!revealed ? (
+                        <button
+                            className="btn-primary"
+                            onClick={() => socket.emit('reveal-cards', { roomCode: room.code })}
+                        >
+                            Revelar Cartas
+                        </button>
+                    ) : (
+                        <button
+                            className="btn-primary"
+                            onClick={handleRestart}
+                        >
+                            Nuevo Juego
+                        </button>
+                    )}
                 </div>
             )}
             <button

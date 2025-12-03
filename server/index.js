@@ -113,6 +113,14 @@ io.on('connection', (socket) => {
         }
     });
 
+    // Reveal Cards
+    socket.on('reveal-cards', ({ roomCode }) => {
+        const room = rooms.get(roomCode);
+        if (room && room.hostId === socket.id) {
+            io.to(roomCode).emit('cards-revealed');
+        }
+    });
+
     // Restart Game
     socket.on('restart-game', ({ roomCode }) => {
         const room = rooms.get(roomCode);
